@@ -1,0 +1,113 @@
+<button mat-button color="primary" routerLink="/" class="go-back">
+  <mat-icon>arrow_back</mat-icon>
+  Back
+</button>
+
+<div class="user-info">
+  <figure>
+    <img src="https://via.placeholder.com/200x200" alt="" />
+  </figure>
+  <div class="details">
+    <h3>{{ user.name }}</h3>
+    <p>{{ user.email }}</p>
+    <span
+      [ngClass]="{
+        green: user.status.toLowerCase() === 'active',
+        red: user.status.toLowerCase() === 'inactive'
+      }"
+      >{{ user.status }}</span
+    >
+  </div>
+</div>
+
+<div class="user-statistics">
+  <div class="user-statistics__property">
+    <h4>Total No. of Posts</h4>
+    <h3 style="color: darkblue">{{ paginationInfo.total }}</h3>
+  </div>
+  <div class="user-statistics__property">
+    <h4>Current Page No. of Posts</h4>
+    <h3 style="color: darkred">{{ posts.length }}</h3>
+  </div>
+  <div class="user-statistics__property">
+    <h4>User Creation Date</h4>
+    <h3>{{ user.created_at | date: "shortDate" }}</h3>
+  </div>
+  <div class="user-statistics__property">
+    <h4>User Updated Date</h4>
+    <h3>{{ user.updated_at | date: "shortDate" }}</h3>
+  </div>
+</div>
+
+<mat-card>
+  <mat-card-content>
+    <ng-template #spinner>
+      <mat-spinner></mat-spinner>
+    </ng-template>
+    <ng-container *ngIf="posts; else spinner">
+      <div *ngIf="posts.length; else noData">
+        <mat-form-field>
+          <mat-label>Filter</mat-label>
+          <input
+            matInput
+            (keyup)="applyFilter($event)"
+            placeholder="Type Your Search"
+            #input
+          />
+        </mat-form-field>
+        <table mat-table [dataSource]="dataSource" matSort>
+          <ng-container matColumnDef="id">
+            <th
+              mat-header-cell
+              *matHeaderCellDef
+              mat-sort-header
+              style="min-width: 80px"
+            >
+              Post ID
+            </th>
+            <td mat-cell *matCellDef="let row">{{ row.id }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="title">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>
+              Post Title
+            </th>
+            <td mat-cell *matCellDef="let row">{{ row.title }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="body">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Body</th>
+            <td mat-cell *matCellDef="let row">
+              {{ row.body | truncate: 100 }}
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="tableDisplayedColumns"></tr>
+          <tr
+            mat-row
+            [routerLink]="['/users/', id, 'posts', row.id]"
+            *matRowDef="let row; columns: tableDisplayedColumns"
+          ></tr>
+
+          =
+          <tr class="mat-row" *matNoDataRow>
+            <td class="mat-cell" colspan="4">
+              No data matching the filter "{{ input.value }}"
+            </td>
+          </tr>
+        </table>
+
+        <mat-paginator
+          [showFirstLastButtons]="true"
+          [length]="paginationInfo.total"
+          [pageSize]="paginationInfo.limit"
+          [class.hidden]="paginationInfo.pages === 1"
+          (page)="paginate($event.pageIndex + 1)"
+        ></mat-paginator>
+      </div>
+      <ng-template #noData>
+        <p class="center">There is no data found</p>
+      </ng-template>
+    </ng-container>
+  </mat-card-content>
+</mat-card>
